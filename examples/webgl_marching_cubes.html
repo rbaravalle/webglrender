@@ -148,7 +148,7 @@
 			// MATERIALS
 
 			materials = generateMaterials();
-			current_material = "shiny";
+			current_material = "matte";
 
 			// MARCHING CUBES
 
@@ -246,26 +246,13 @@
             x = Math.random();
             y = Math.random();
             z = Math.random();
-        	for ( i = 0; i < sizz3; i ++ ) {
-                points[i] = Math.floor(Math.random()*2);
-                //while(x*x+y*y < 0.2) x = Math.random();
-                /*if(i%20) {
-                    x = Math.random();
-                    y = Math.random();
-                    z = Math.random();
-                }
-		        pX = x+rx(r)/100000;//(x+Math.random()/150) * 150 //- 100,
-		        pY = y+rx(r)/100000;//(y+Math.random()/150) * 150 //- 100,
-		        pZ = z+rx(r)/100000; //Math.random()/150) * 50 //- 100,
-                //if(i%20 == 0) {
-                    z = pZ
-                    y = pY
-                    x = pX
-                //}
-                //if(i%porCapa == 0) z += sepCapa; 
-                points[i*3+0] = pX;
-                points[i*3+1] = pY;
-                points[i*3+2] = pZ;*/
+        	for ( i = 0; i < 12000; i ++ ) {
+                x = Math.floor(Math.random()*60)
+                y = Math.floor(Math.random()*60)
+                z = Math.floor(Math.random()*60)
+                points[i*3+0] = x;
+                points[i*3+1] = y;
+                points[i*3+2] = z;
 
             }
 		}
@@ -489,7 +476,7 @@
 
 			effectController = {
 
-			material:   "shiny",
+			material:   "matte",
 
 			speed :   1.0,
 			numBlobs:   10,
@@ -501,8 +488,8 @@
 			wallz: false,
 
 			hue:    0.0,
-			saturation: 0.9,
-			value:    0.3,
+			saturation: 0.0,
+			value:    1.0,
 
 			lhue:     0.04,
 			lsaturation: 1.0,
@@ -589,26 +576,21 @@
 			var i, ballx, bally, ballz, subtract, strength;
 
 			subtract = 100;
-			strength = 0.2//    numBlobs/maxBlobs;//1.2 / ( ( Math.sqrt( sizz3 ) - 1 ) / 4 + 1 ); 
+;
+			strength = 0.2//1.2 / ( ( Math.sqrt( numBlobs ) - 1 ) / 4 + 1 ); 
 
-			if ( floor ) object.addPlaneY( 2, 12 );
+			if ( floor ) { object.addPlaneY( 2, 12,0 ); object.fill(points);}
 			if ( wallz ) object.addPlaneZ( 2, 12 );
 			if ( wallx ) object.addPlaneX( 2, 12 );
             var lastZ = 0;
 			for ( i = 0; i < sizz3; i ++ ) {
-
-				/*ballx = points[i*3+0]; //Math.sin( i + 1.26 * time * ( 1.03 + 0.5 * Math.cos( 0.21 * i ) ) ) * 0.27 + 0.5;
-				bally = points[i*3+1]; //Math.abs( Math.cos( i + 1.12 * time * Math.cos( 1.22 + 0.1424 * i ) ) ) * 0.77; // dip into the floor
-				ballz = points[i*3+2]; //Math.cos( i + 1.32 * time * 0.1 * Math.sin( ( 0.92 + 0.53 * i ) ) ) * 0.27 + 0.5;*/
                 z = Math.floor(i/sizz2)
                 rest = i-z*sizz2
-                //if(z!=0) alert(z*sizz2)
                 y = Math.floor(rest/sizz)
                 x = rest%sizz
-//                if(z!= lastZ) { lastZ = z; alert(z/14); }
-                if(points[i] == 1) {
+                /*if(points[i] == 1) {
     				object.addBall(x/sizz,y/sizz,z/sizz, strength, subtract);
-                }
+                }*/
 
 			}
 

@@ -453,57 +453,24 @@ THREE.MarchingCubes = function ( resolution, material, enableUvs, enableColors )
 
     this.fill = function(points) {
         
+        var x, y, z, yy, val, ydiv, cy, cxy,
 
-		// Don't polygonize in the outer layer because normals aren't
-		// well-defined there.
+		// cache attribute lookups
+		size = this.size,
+		yd = this.yd,
+		zd = this.zd,
+		field = this.field;
 
-		var x, y, z, y_offset, z_offset, fx, fy, fz, fz2, fy2, val;
-        ballx = bally = ballz = 0.5;
-
-        numblobs = 300;
-        subtract = 1.0//;
-        strength = 1.0//1.2 / ( ( Math.sqrt( numblobs ) - 1 ) / 4 + 1 );
-
-		var radius = this.size * Math.sqrt( strength / subtract ),
-			zs = ballz * this.size,
-			ys = bally * this.size,
-			xs = ballx * this.size;
-
-		var min_z = Math.floor( 1 ); if ( min_z < 1 ) min_z = 1;
-		var max_z = Math.floor( this.size -1 ); if ( max_z > this.size - 1 ) max_z = this.size - 1;
-		var min_y = Math.floor( 1 ); if ( min_y < 1 ) min_y = 1;
-		var max_y = Math.floor( this.size -1 ); if ( max_y > this.size - 1 ) max_y = this.size - 1;
-		var min_x = Math.floor( 1 ); if ( min_x < 1  ) min_x = 1;
-		var max_x = Math.floor( this.size -1 ); if ( max_x > this.size - 1 ) max_x = this.size - 1;
-
-		for ( z = min_z; z < max_z; z++ ) {
-
-			z_offset = this.size2 * z,
-			fz = z / this.size - ballz,
-			fz2 = fz * fz;
-
-			for ( y = min_y; y < max_y; y++ ) {
-
-				y_offset = z_offset + this.size * y;
-				fy = y / this.size - bally;
-				fy2 = fy * fy;
-
-				for ( x = min_x; x < max_x; x++ ) {
-
-					/*fx = x / this.size - ballx;
-					val = 1.0 / (  fx*fx + fy2 + fz2 );
-					if ( val > 0.0 ) this.field[ y_offset + x ] += val;*/
-
-					//val = strength / ( 0.000001 + fx*fx + fy2 + fz2 ) - subtract;
-					/*if ( x > 10 && y < 10 ) this.field[ y_offset + x ] += val;
-                    else this.field[ y_offset + x ] += 0.0;*/
-                    m = this.size/2;
-                    this.field[ y_offset + x ] = (x%m+y%m+z%m+x%(m-1)+y%(m-1)+z%(m-1)+z%(m+1)+z%m)/10.0;
-				}
-
-			}
-
-		}
+        var t;
+        for(t = 0; t < points.length; t++) {
+            x = points[t*3];
+            y = points[t*3+1];
+            z = points[t*3+2];
+            for(i = x-1; i < x+1; i++)
+                for(j = y-1; j < y+1; j++)
+                    for(k = z-1; k < z+1; k++)
+                        field[ zd * i + j * yd + k ] = 0;
+        }
     }
 
 	/////////////////////////////////////
@@ -638,6 +605,7 @@ THREE.MarchingCubes = function ( resolution, material, enableUvs, enableColors )
 			dist = size * Math.sqrt( strength / subtract );
 
 		if ( dist > size ) dist = size;
+        dist = dist/20;
 
 		for ( x = 0; x < dist; x ++ ) {
 
@@ -665,7 +633,7 @@ THREE.MarchingCubes = function ( resolution, material, enableUvs, enableColors )
 
 	};
 
-	this.addPlaneY = function( strength, subtract ) {
+	this.addPlaneY = function( strength, subtract, where ) {
 
 		var x, y, z, yy, val, ydiv, cy, cxy,
 
@@ -675,26 +643,29 @@ THREE.MarchingCubes = function ( resolution, material, enableUvs, enableColors )
 			zd = this.zd,
 			field = this.field,
 
-			dist = size * Math.sqrt( strength / subtract );
+			dist = size;// * Math.sqrt( strength / subtract );
 
 		if ( dist > size ) dist = size;
 
-		for ( y = 0; y < dist; y ++ ) {
+        var x2,y2,z2;
+		for ( y = 2; y < where+dist-2; y ++ ) {
 
 			ydiv = y / size;
 			yy = ydiv * ydiv;
-			val = strength / ( 0.0001 + yy ) - subtract;
+            //alert(strength / ( yy ) - subtract);
+			val = 86//strength / ( yy ) - subtract;
 
 			if ( val > 0.0 ) {
 
 				cy = y * yd;
 
-				for ( x = 0; x < size; x ++ ) {
+				for ( x = 2; x < size-2; x ++ ) {
 
 					cxy = cy + x;
 
-					for ( z = 0; z < size; z ++ )
-						field[ zd * z + cxy ] += val;
+					for ( z = 2; z < size-2; z ++ ) {
+                        field[ zd * z + cxy ] += val;
+                    }
 
 				}
 
@@ -772,16 +743,16 @@ THREE.MarchingCubes = function ( resolution, material, enableUvs, enableColors )
 		for ( z = 1; z < smin2; z ++ ) {
 
 			z_offset = this.size2 * z;
-			fz = ( z - this.halfsize ) / this.halfsize; //+ 1
+			fz = ( z - this.halfsize ) / this.halfsize + 1
 
 			for ( y = 1; y < smin2; y ++ ) {
 
 				y_offset = z_offset + this.size * y;
-				fy = ( y - this.halfsize ) / this.halfsize; //+ 1
+				fy = ( y - this.halfsize ) / this.halfsize+ 1
 
 				for ( x = 1; x < smin2; x ++ ) {
 
-					fx = ( x - this.halfsize ) / this.halfsize; //+ 1
+					fx = ( x - this.halfsize ) / this.halfsize + 1
 					q = y_offset + x;
 
 					this.polygonize( fx, fy, fz, q, this.isolation, renderCallback );
