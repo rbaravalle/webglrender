@@ -462,13 +462,14 @@ THREE.MarchingCubes = function ( resolution, material, enableUvs, enableColors )
 		field = this.field;
 
         var t;
+        var r = 1;
         for(t = 0; t < points.length; t++) {
             x = points[t*3];
             y = points[t*3+1];
             z = points[t*3+2];
-            for(i = x-1; i < x+1; i++)
-                for(j = y-1; j < y+1; j++)
-                    for(k = z-1; k < z+1; k++)
+            for(i = x-r; i < x+r; i++)
+                for(j = y-r; j < y+r; j++)
+                    for(k = z-r; k < z+r; k++)
                         field[ zd * i + j * yd + k ] = 0;
         }
     }
@@ -653,7 +654,7 @@ THREE.MarchingCubes = function ( resolution, material, enableUvs, enableColors )
 			ydiv = y / size;
 			yy = ydiv * ydiv;
             //alert(strength / ( yy ) - subtract);
-			val = 86//strength / ( yy ) - subtract;
+			val = 110//strength / ( yy ) - subtract;
 
 			if ( val > 0.0 ) {
 
@@ -664,6 +665,10 @@ THREE.MarchingCubes = function ( resolution, material, enableUvs, enableColors )
 					cxy = cy + x;
 
 					for ( z = 2; z < size-2; z ++ ) {
+                        var x2 = x-Math.floor(3*size/4)
+                        var y2 = y-Math.floor(3*size/4)
+                        var z2 = z-Math.floor(3*size/4)
+                        if(x2*x2+y2*y2+z2*z2>5200)
                         field[ zd * z + cxy ] += val;
                     }
 
