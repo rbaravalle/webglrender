@@ -73,6 +73,7 @@
 	<script src="js/postprocessing/ShaderPass.js"></script>
 	<script src="js/postprocessing/MaskPass.js"></script>
 	<script src="js/postprocessing/SavePass.js"></script>
+	<script src="js/loaders/ColladaLoader.js"></script>
 
 	<script src="js/MarchingCubes.js"></script>
 	<script src="js/ShaderToon.js"></script>
@@ -99,10 +100,10 @@
 		var light, pointLight, ambientLight;
 
 		var effect, resolution, numBlobs;
-        var sizz, sizz2, sizz3;
-        sizz = 120;
-        sizz2 = sizz*sizz;
-        sizz3 = sizz2*sizz;
+		var sizz, sizz2, sizz3;
+		sizz = 120;
+		sizz2 = sizz*sizz;
+		sizz3 = sizz2*sizz;
 
 		var composer, effectFXAA, hblur, vblur;
 
@@ -125,8 +126,8 @@
 
 			// CAMERA
 
-			camera = new THREE.PerspectiveCamera( 45, SCREEN_WIDTH / SCREEN_HEIGHT, 1, 10000 );
-			camera.position.set( -200, -500, 4500 );
+			camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
+			camera.position.set( 0, 0, 4500 );
 
 			// SCENE
 
@@ -236,41 +237,91 @@
 			window.addEventListener( 'resize', onWindowResize, false );
 
 		    points = new Float32Array( sizz3);
-            var x,y,z;
-            var pX, pY, pZ;
-            /*x = Math.random();
-            y = Math.random();
-            z = Math.random();*/
-            sizz = resolution
-            siz = 80
-            var j = 0;
+		    var x,y,z;
+		    var pX, pY, pZ;
+		    /*x = Math.random();
+		    y = Math.random();
+		    z = Math.random();*/
+		    sizz = resolution
+		    siz = 80
+		    var j = 0;
 
-            r = 3;
-            sep = 4;
-            h = 0;
-            lifetime = 80
-            ch = 30
-        	for ( i = 0; i < sizz; i +=sep ) {
-            	for ( j = 0; j < sizz; j +=sep ) {
-                	for ( k = 0; k < sizz; k +=sep ) {
-                        s = rx(lifetime)
-                    	for ( l = 0; l < s; l ++ ) {
-                            if(l%ch==0) {
-                                x = pX;
-                                y = pY;
-                                z = pZ;
-                            }
-                            else { x = i; y = j; z = k; }
-                            pX = x+rx(r);
-                            pY = y+rx(r);
-                            pZ = z+rx(r);
-                            points[h++] = pX;
-                            points[h++] = pY;
-                            points[h++] = pZ;
-                        }
-                    }
-                }
-            }
+		    r = 3;
+		    sep = 4;
+		    h = 0;
+		    lifetime = 80
+		    ch = 30
+			for ( i = 0; i < sizz; i +=sep ) {
+		    	    for ( j = 0; j < sizz; j +=sep ) {
+				for ( k = 0; k < sizz; k +=sep ) {
+			        s = rx(lifetime)
+			    	for ( l = 0; l < s; l ++ ) {
+			            if(l%ch==0) {
+			                x = pX;
+			                y = pY;
+			                z = pZ;
+			            }
+			            else { x = i; y = j; z = k; }
+			            pX = x+rx(r);
+			            pY = y+rx(r);
+			            pZ = z+rx(r);
+			            points[h++] = pX;
+			            points[h++] = pY;
+			            points[h++] = pZ;
+			        }
+			    }
+			}
+		    }
+			var dae;
+			var loader = new THREE.ColladaLoader();
+			loader.options.convertUpAxis = true;
+			loader.load( 'models/collada/cube/cube.dae', function ( collada ) {
+
+				dae = collada.scene;
+
+				dae.scale.x = dae.scale.y = dae.scale.z = 680;
+                //dae.translate.x = dae.translate.y = dae.translate.z = 10000 ;
+				dae.updateMatrix();
+				scene.add(dae);
+
+			} );
+			camera.lookAt( scene.position );
+			var timer = Date.now() * 0.0005;
+
+
+				var geometry = new THREE.Geometry();
+				var material = new THREE.LineBasicMaterial( { color: 0x303030 } );
+				var size = 1000; var step = 100;
+				for ( var i = - size; i <= size; i += step ) {
+
+					geometry.vertices.push( new THREE.Vector3( - size, - 0.04, i ) );
+					geometry.vertices.push( new THREE.Vector3(   size, - 0.04, i ) );
+
+					geometry.vertices.push( new THREE.Vector3( i, - 0.04, - size ) );
+					geometry.vertices.push( new THREE.Vector3( i, - 0.04,   size ) );
+
+				}
+
+				var line = new THREE.Line( geometry, material, THREE.LinePieces );
+				scene.add( line );
+particleLight = new THREE.Mesh( new THREE.SphereGeometry( 4, 8, 8 ), new THREE.MeshBasicMaterial( { color: 0xffffff } ) );
+				scene.add( particleLight );
+
+				// Lights
+
+				scene.add( new THREE.AmbientLight( 0xcccccc ) );
+
+				var directionalLight = new THREE.DirectionalLight(/*Math.random() * 0xffffff*/0xeeeeee );
+				directionalLight.position.x = 0.5;
+				directionalLight.position.y = 0.5;
+				directionalLight.position.z = 0.5;
+				directionalLight.position.normalize();
+				scene.add( directionalLight );
+
+				pointLight = new THREE.PointLight( 0xffffff, 4 );
+				pointLight.position = particleLight.position;
+				scene.add( pointLight );
+
 
         	/*for ( i = 0; i < 512000; i ++ ) {
                 if(i%siz == 0) {
@@ -376,8 +427,8 @@
 
 			"matte" :
 			{
-				m: new THREE.MeshPhongMaterial( { color: 0x555555, specular: 0x222222, shininess: 30, transparent:true, opacity: 0.53} ),
-				h: 0, s: 0, v: 1
+				m: new THREE.MeshPhongMaterial( { color: 0x555555, specular: 0x552222, shininess: 50, transparent:true, opacity: 0.3} ),
+				h: 0.2, s: 0.4, v: 1
 			},
 
 			"flat" :
@@ -618,6 +669,7 @@
 			strength = 0.2//1.2 / ( ( Math.sqrt( numBlobs ) - 1 ) / 4 + 1 ); 
 
 			if ( floor ) { object.addPlaneY( 2, 12,0 ); object.fill(points);}
+            delete points;
 			if ( wallz ) object.addPlaneZ( 2, 12 );
 			if ( wallx ) object.addPlaneX( 2, 12 );
             /*var lastZ = 0;

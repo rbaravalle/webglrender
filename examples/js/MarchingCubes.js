@@ -668,7 +668,7 @@ THREE.MarchingCubes = function ( resolution, material, enableUvs, enableColors )
                         var x2 = x-Math.floor(3*size/4)
                         var y2 = y-Math.floor(3*size/4)
                         var z2 = z-Math.floor(3*size/4)
-                        if(x2*x2+y2*y2+z2*z2>5200)
+                        if(z>40)
                         field[ zd * z + cxy ] += val;
                     }
 
